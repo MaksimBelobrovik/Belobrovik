@@ -1,0 +1,11 @@
+commit 095d48e8b82246ab1327389c2b13433dfeee76eb (HEAD -> master)
+Author: Maxim Belobrovik <maksim-belobrovik@rambler.ru>
+Date:   Sun Feb 17 20:58:30 2019 +0300
+
+    add.task1/status.txt
+
+commit f4c8cca5ae4b167bde46396abe7e3ea90a69e183
+Author: Maxim Belobrovik <maksim-belobrovik@rambler.ru>
+Date:   Sun Feb 17 20:55:46 2019 +0300
+
+    add.gtignore

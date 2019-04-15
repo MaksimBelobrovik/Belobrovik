@@ -1,5 +1,149 @@
-var Module=(function(){
-var photoPosts = [
+class PostList {
+    _posts;
+
+    
+
+    constructor(postsList = []) {
+        this._posts = postsList.slice();
+    }
+
+    clear() {
+        this._posts = [];
+    }
+
+    addAll(posts) {
+        if (posts) {
+            var photos = this;
+            var error = [];
+            posts.forEach(function (item) {
+                if (!photos.add(item)) {
+                    error.push(item);
+                }
+            });
+            return error;
+        }
+        return posts;
+    }
+
+    
+
+    static validate(photoPost){
+        var _validator={
+         description: function(description){
+            const MIN=10;
+            const MAX=200;
+             if(description.length>=MIN && description.length<=MAX && typeof description!= "undefined"){
+                 return true;
+             } else{
+                 return false;
+             }
+         },
+         photoLink: function(photoLink){
+            if(photoLink!==null && typeof photoLink!= "undefined"){
+                return true;
+            } else {
+                return false;
+            }
+         }
+    }
+       if(_validator.description(photoPost.description) && _validator.photoLink(photoPost.photoLink)){
+       	return true;
+      } else { 
+          return false;
+      }
+    }  
+    add(photoPost){
+    	photoPost.id=new Date().getMilliseconds();
+    	photoPost.createdAt=new Date();
+       if(PostList.validate(photoPost)){
+           photoPost.likes=[];
+           photoPosts.push(photoPost);
+           return true;
+       } else {
+           return false;
+       }
+    }
+
+    get(id){
+        return photoPosts.find(function(item){
+            return item.id==id;
+        });
+    }
+
+   
+
+    getPage(skip=0,top=10,filterConfig={}){
+    var _filter={
+        author: function(list,author){
+           return list.filter(function(item){
+                return item.author.includes(author);
+            });
+        },
+        firstDate: function(list,firstDate){
+            return list.filter(function(item){
+                return item.createdAt>=firstDate;
+            });
+        },
+        secondDate: function(list,secondDate){
+            return list.filter(function(item){
+                return item.createdAt<=secondDate;
+            });
+        },
+        hashTags: function(list,hashTags){
+            return list.filter(function(item){
+             return item.hashTags.some(tag => hashTags.indexOf(tag)>=0);
+            });
+        }
+    } 
+      var sortedPosts=this._posts;
+        Object.keys(filterConfig).forEach(function(field){
+          return sortedPosts=_filter[field](sortedPosts,filterConfig[field]);
+        });
+        sortedPosts.sort(function(a,b){
+            return a.createdAt-b.createdAt;
+        });
+        sortedPosts = sortedPosts.slice(skip, skip + top);
+      
+        return sortedPosts;
+    } 
+
+    remove(id){
+       for( i=0;i<photoPosts.length;i++){
+            if(photoPosts[i].id===id){
+                      photoPosts.splice(index,1);
+                      return true;
+                      }
+        }
+       return false;
+    }
+
+    edit(id,photoPost){
+       var postToEdit=this.get(id);
+    	if(PostList.validate(postToEdit)){
+            if(photoPost.description!==null && typeof photoPost.description!= "undefined" ){
+                postToEdit.description=photoPost.description;
+            }
+            if(photoPost.photoLink!==null && typeof photoPost.photoLink!= "undefined"){
+                postToEdit.photoLink=photoPost.photoLink;
+            }
+            if(photoPost.hashTags!==null && typeof photoPost.hashTags!= "undefined"){
+                postToEdit.hashTags=photoPost.hashTags;
+            }
+            
+            return true;
+            } else {
+             	return false;
+                         
+        }
+    }    
+    like(user,id){
+        if(this.get(id).likes.indexOf(user)==-1){
+            this.get(id).likes.push(user);
+        }
+    }
+}
+
+const photoPosts = [
     {
     id: '1',
     description: 'Best description ever №1',
@@ -162,134 +306,50 @@ var photoPosts = [
     likes:['ABC'],
     photoLink: 'https://randomsite.ru/randompicture20.jpg'
     },];
-    var validator={
-         id: function(id){
-             if(id!==null){
-             	return true;
-            } else{
-                 return false;
-            }
-         },
-         description: function(description){
-             if(description.length>=10 && description.length<=200 && typeof description!= "undefined"){
-                 return true;
-             } else{
-                 return false;
-             }
-         },
-         createdAt: function(createdAt){
-            if(createdAt!==null){
-                return true;
-            } else {
-                return false;
-            }
-         }, 
-         author: function(author){
-            if(author!==null && typeof author!= "undefined"){
-                return true;
-            } else {
-                return false;
-            }
-         },
-         photoLink: function(photoLink){
-            if(photoLink!==null && typeof photoLink!= "undefined"){
-                return true;
-            } else {
-                return false;
-            }
-         }
-    }
-    function validatePhotoPost(photoPost){
-       if(validator.id(photoPost.id) && validator.description(photoPost.description) && validator.createdAt(photoPost.createdAt) && validator.author(photoPost.author) && validator.photoLink(photoPost.photoLink)){
-       	return true;
-      } else { 
-          return false;
-      }
-    }  
-    function addPhotoPost(photoPost){
-    	photoPost.id=new Date().getMilliseconds();
-    	photoPost.createdAt=new Date();
-       if(validatePhotoPost(photoPost)){
-           photoPost.likes=[];
-           photoPosts.push(photoPost);
-           return true;
-       } else {
-           return false;
-       }
-    }
-    function getPhotoPost(id){
-        var post=photoPosts.find(function(item){
-            return item.id==id;
-        });
-        return post;
-    }
-    var filter={
-        author: function(list,author){
-           return list.filter(function(item){
-                return item.author===author;
-            });
-        },
-        firstDate: function(list,firstDate){
-            return list.filter(function(item){
-                return item.createdAt>=firstDate;
-            });
-        },
-        secondDate: function(list,secondDate){
-            return list.filter(function(item){
-                return item.createdAt<=secondDate;
-            });
-        },
-        hashTags: function(list,hashTags){
-            return list.filter(function(item){
-             return item.hashTags.some(tag => hashTags.indexOf(tag)>=0);
-            });
-        }
-    } 
-    function getPhotoPosts(skip=0,top=10,filterConfig={}){
-        var sortedPosts=photoPosts;
-        Object.keys(filterConfig).forEach(function(field){
-           return sortedPosts=filter[field](sortedPosts,filterConfig[field]);
-        });
-        sortedPosts.sort(function(a,b){
-            return a.createdAt-b.createdAt;
-        });
-        sortedPosts.splice(0,skip);
-        sortedPosts.splice(top,sortedPosts.length);        
-        return sortedPosts;
-    }  
-    function removePhotoPost(id){
-        photoPosts.map(function (item, index) {
-             if(item.id == id) {
-                      photoPosts.splice(index,1);
-                      return true;
-                      }
-        })
-       return false;
-    }
-    function editPhotoPost(id,photoPost){
-    	if(validatePhotoPost(getPhotoPost(id))){
-            getPhotoPost(id).createdAt=new Date();
-            if(photoPost.description!==null && typeof photoPost.description!= "undefined" ){
-                getPhotoPost(id).description=photoPost.description;
-            }
-            if(photoPost.photoLink!==null && typeof photoPost.photoLink!= "undefined"){
-                getPhotoPost(id).photoLink=photoPost.photoLink;
-            }
-            if(photoPost.hashTags!==null && typeof photoPost.hashTags!= "undefined"){
-                getPhotoPost(id).hashTags=photoPost.hashTags;
-            }
-            if(validatePhotoPost(getPhotoPost(id))){
-            return true;
-            } else {
-             	return false;
-              } 
-            } else{
-            	return false;
-            }              
-    }    
-    function like(user,id){
-        if(getPhotoPost(id).likes.indexOf(user)==-1){
-            getPhotoPost(id).likes.push(user);
-        }
-    }
-}());
+
+
+
+let test = new PostList(photoPosts);
+console.log("let test = new PostList(photoPosts);");
+console.log("");
+console.log("");
+console.log("test._posts");
+console.log(test._posts);
+console.log("");
+console.log("");
+console.log("test.getPage(0, 10)");
+console.log(test.getPage(0, 10));
+console.log("test.getPage(10, 10)");
+console.log(test.getPage(10, 10));
+console.log("test.getPage(0, 10, {author: 'AB'})");
+console.log(test.getPage(0, 10, {author: 'AB'}));
+console.log("");
+console.log("");
+console.log("test.get('10')");
+console.log(test.get("10"));
+console.log('test.get(10)');
+console.log(test.get(10));
+console.log("");
+console.log("");
+console.log("PostList.validate({ id: '23', description: 'Nexus 10', createdAt: new Date('2019-03-08T21:57:49'), author: 'KillerMask', photoLink: 'http://photoportal.by/photos/18', hashTags: [], likes: [] })");
+console.log(PostList.validate({ id: '23', description: 'Nexus 10', createdAt: new Date('2019-03-08T21:57:49'), author: 'KillerMask', photoLink: 'http://photoportal.by/photos/18', hashTags: [], likes: [] }));
+console.log("PostList.validate({ id: '', description: 'Nexus 10', createdAt: new Date('2019-03-08T21:57:49'), author: 'KillerMask', photoLink: 'http://photoportal.by/photos/18', hashTags: [], likes: [] })");
+console.log(PostList.validate({ id: '', description: 'Nexus 10', createdAt: new Date('2019-03-08T21:57:49'), author: 'KillerMask', photoLink: 'http://photoportal.by/photos/18', hashTags: [], likes: [] }));
+console.log("");
+console.log("");
+console.log("test.add({ id: '23', description: 'Nexus 10', createdAt: new Date('2019-03-08T21:57:49'), author: 'KillerMask', photoLink: 'http://photoportal.by/photos/18', hashTags: [], likes: [] })");
+console.log(test.add({ id: '23', description: 'Nexus 10', createdAt: new Date('2019-08-08T21:57:49'), author: 'KillerMask', photoLink: 'http://photoportal.by/photos/18', hashTags: [], likes: [] }));
+console.log("");
+console.log("");
+console.log("test.get('1')");
+console.log(test.get("1"));
+console.log("test.edit('1', { photoLink: 'http://haradok.info/static/news/5/4565/preview.jpg,description:'Поменяли!'' })");
+console.log(test.edit('1', { photoLink: 'http://haradok.info/static/news/5/4565/preview.jpg', description: "zxcvbnm" }));
+console.log("test.get('1')");
+console.log(test.get("1"));
+console.log("");
+console.log("");
+console.log("test.clear();");
+test.clear();
+console.log("test._posts");
+console.log(test._posts);

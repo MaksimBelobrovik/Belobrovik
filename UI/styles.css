@@ -55,6 +55,14 @@
           padding-right: 15px;
           padding-bottom: 40px;
           }
+ .image {
+          position: relative;
+          width: 70%;
+          height: 60%;
+          padding: 6px;
+          padding-right: 15px;
+          padding-bottom: 40px;
+          }
 
  .username {
           background: rgba(255, 255, 255, 0.5);
@@ -99,7 +107,7 @@
  .desc {
           background: rgba(255, 255, 255, 0.5);
           width: 20%;
-          height: 40%;
+          height: 30%;
           border: 1px solid black;
           padding: 6px;
           padding-right: 15px;

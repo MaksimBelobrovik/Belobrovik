@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <link rel="stylesheet" type="text/css" href="styles.css">
-<script src="photoPost.js"></script>
+<script defer src="photoPost.js"></script>
+<script defer src="eventListeners.js"></script>
 <head>
     <title>PhotoGalaxy</title>
 </head>
@@ -11,46 +12,36 @@
 </header>
 <main>
 <div class="addphoto" align="center"  id="add">Add Photo</div>
-<div class="userzone" align="center" id="username">User Name
-<img src="https://openclipart.org/image/800px/svg_to_png/20476/SnEptUne-Logoff-Icon.png" height="100%" align="right">
+<div class="userzone"  id="username" align="center" >User Name
 </div>
+    <button id="exit" class="buttonC">Log out</button>
+    <button id="reg" class="buttonC">Log in</button>
 <center><br><h2><b><i><font color="blue" face="Georgia">Welcome To Our Galaxy</font></i></b></h2></center>
-<div class="element1">
+
+    <div class="element1">
    <center><font color="blue" face="Georgia" size="8px">Filters</font></center>
     <p id="list">
    <input list="authors" placeholder="User Name" id="authorFilter">
         <datalist id="authors">
         </datalist>
     </p>
-    <p><input placeholder="First Date">
-        <input placeholder="Second Date">
+    <p><input placeholder="First Date" id="dateFilter1">
+        <input placeholder="Second Date" id="dateFilter2">
     </p>
     <p>
-        <input placeholder="#hashtag">
+        <input placeholder="#hashtag" id="hashtagFilter">
     </p>
-    <div class="buttonsearch" align="center"><font color="white" face="Georgia">Search</font></div>
+    <button id="search" class="buttonsearch"><font color="white" face="Georgia">Search</font></button>
 </div>
 
     <div class="element2">
         <section id='posts'>
         </section>
-    <template id='temp'>
-        <div class="photo">
-                <div id='user' class="username"></div>
-                <div id='date' class="date"></div>
-                <img id='photo' src="" width="70%" height="60%">
-                <img src="https://pixy.org/src/477/4773926.png"; height="40"; width="40"; hspace="30%"; vspace="2px">
-                <img id='edit'   src="https://sharpsnippets.files.wordpress.com/2013/12/editblue.png"; height="40"; width="40";>
-                <img id='delete' src="https://cdn.icon-icons.com/icons2/1089/PNG/512/basket_78316.png"; height="40"; width="40";>
-                <div id='hashtags' class="hashtag"></div>
-            <div class="desc" id="description"><b><i><font color="blue" face="Georgia" size="2px"></font></i></b> </div>
-        </div>
-    </template>
+        <button class="buttonview" id="view"><font color="white" face="Georgia">View More</font></button>
+        <button class="buttonadd" align="center" id="addButton"><font color="white" face="Georgia">Add</font></button>
    </div>
 
-</div>
-<div class="buttonview"><font color="white" face="Georgia">View More</font></div>
-<div class="buttonadd" align="center" id="addButton"><font color="white" face="Georgia">Add</font></div>
+
 </main>
 <footer>
 <div class="footer">PhotoGalaxy
@@ -60,5 +51,34 @@
     dd.mm.yyyy
 </div>
 </footer>
+
+<!--sign in window -->
+<div id="signInModal" class="modal">
+    <div class="modalContent">
+        </div>
+    <p id="signInPhrase"><h2><i><font color="blue" face="Georgia">Welcome</font></i></h2></p>
+        <p style="display: none; color:red; font-size:3vw; face:Georgia " id="wrongData">Wrong UserName or Password</p>
+        <input type="text" placeholder="Login" class="filterField" id="login">
+        <input type="password" placeholder="Password" class="filterField" id="password">
+        <button class="buttonview" id="signIN">Log In</button>
+</div>
+
+<!--edit or add post window -->
+<div id="editModal" class="modal">
+    <div class="modalContent">
+        <input type="url" name="pic" accept="image/*" placeholder="Image url" id="imageURL" class="filterField">
+        <button class="buttonview" id="upload">Upload</button>
+        <img id="photoModal" src="" width=50% class="image2">
+        <div id="descrModal">
+            <p id="nameModal" class="username"></p>
+            <p id="dateModal" class="date"></p>
+            <br>
+            <textarea id="shortDescrModal" class="desc" placeholder="Description"></textarea>
+            <textarea id="hashTagsModal" class="hashtag" placeholder="#"></textarea>
+        </div>
+        <button class="buttonview" id="okEdit">OK</button>
+    </div>
+</div>
+
 </body>
 </html>

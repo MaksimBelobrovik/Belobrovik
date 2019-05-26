@@ -28,7 +28,6 @@ const modul = (function () {
     }
 })();
 
-
 class PostList {
     _posts;
     _user;
@@ -57,6 +56,17 @@ class PostList {
             return error;
         }
         return posts;
+    }
+
+     save() {
+        localStorage.setItem('posts', JSON.stringify(this._posts));
+    }
+
+    restore() {
+        if (!localStorage.getItem('posts')) {
+            localStorage.clear();
+            localStorage.setItem('posts', JSON.stringify(this._posts));
+        }
     }
 
      static _validator={
@@ -89,9 +99,11 @@ class PostList {
     add(photoPost){
     	photoPost.id=new Date().getMilliseconds()-Math.random();
     	photoPost.createdAt=new Date();
+       // photoPost.author=this._user;
        if(PostList.validate(photoPost)){
            photoPost.likes=[];
-           photoPosts.push(photoPost);
+           this._posts.push(photoPost);
+           this.save();
            return true;
        } else {
            return false;
@@ -99,52 +111,47 @@ class PostList {
     }
 
     get(id){
-        return photoPosts.find(function(item){
+        return this._posts.find(function(item){
             return item.id==id;
         });
     }
 
-   static _filter={
-        author: function(list,author){
-           return list.filter(function(item){
-                return item.author.includes(author);
-            });
-        },
-        firstDate: function(list,firstDate){
-            return list.filter(function(item){
-                return item.createdAt>=firstDate;
-            });
-        },
-        secondDate: function(list,secondDate){
-            return list.filter(function(item){
-                return item.createdAt<=secondDate;
-            });
-        },
-        hashTags: function(list,hashTags){
-            return list.filter(function(item){
-             return item.hashTags.some(tag => hashTags.indexOf(tag)>=0);
-            });
-        }
-    } 
-
-    getPage(skip=0,top=10,filterConfig={}){
     
-      var sortedPosts=this._posts;
-        Object.keys(filterConfig).forEach(function(field){
-          return sortedPosts=this._filter[field](sortedPosts,filterConfig[field]);
-        });
-        sortedPosts.sort(function(a,b){
-            return a.createdAt-b.createdAt;
-        });
-        sortedPosts = sortedPosts.slice(skip, skip + top);
-      
-        return sortedPosts;
-    } 
+
+     getPage(skip, top, filterConfig) {
+        var toShow = this._posts;
+
+        skip = skip || 0;
+        top = top || 10;
+
+        if (!filterConfig) {
+            toShow.sort(PostList.compareTo);
+            return toShow.slice(skip, skip + top);
+        }
+
+        if (filterConfig) {
+            if (filterConfig.author) {
+                toShow = toShow.filter(function (x) { return x.author === filterConfig.author; });
+            }
+            if (filterConfig.createdAt) {
+                toShow = toShow.filter(function (x) { return (x.createdAt.substr(0, 10) === filterConfig.createdAt); });
+            }
+            if (filterConfig.hashTags) {
+                toShow = toShow.filter(function (x) {
+                    return x.hashTags.indexOf(filterConfig.hashTags) !== -1;
+                });
+            }
+            toShow.sort(PostList.compareTo);
+            return toShow.slice(skip, skip + top);
+        }
+    }
+
 
     remove(id){
        for(var i=0;i<photoPosts.length;i++){
             if(photoPosts[i].id===id){
                       photoPosts.splice(i,1);
+                      this.save;
                       return true;
                       }
         }
@@ -163,7 +170,7 @@ class PostList {
             if(photoPost.hashTags!==null && typeof photoPost.hashTags!= "undefined"){
                 postToEdit.hashTags=photoPost.hashTags;
             }
-            
+            this.save();
             return true;
             } else {
              	return false;
@@ -178,7 +185,7 @@ class PostList {
 }
 
 var photoPosts = [
-    {
+/*{
     id: '1',
     description: 'Best description ever №1',
     createdAt: new Date('2018-02-23T22:00:00'),
@@ -203,16 +210,20 @@ var photoPosts = [
     hashTags:['#abc','#qwe','#uio'],
     likes:['ABC'],
     photoLink: 'http://www.setwalls.ru/download.php?file=201305/2560x1600/setwalls.ru-37717.jpg'
-    }   
+    }  */ 
     ];
 
 var list = new PostList(photoPosts, '');
+list.restore();
 
 
 class View {
     _posts;
     _user;
     _authors;
+    static idToEdit;
+    static idToDelete;
+    static editOrAdd;
 
     static setUser(name) {
         this._user = name;
@@ -220,77 +231,86 @@ class View {
             document.getElementById("add").textContent = "Guests cant add posts";
             document.getElementById("username").textContent = "Log In";
             document.getElementById("addButton").style.display="none";
-            return undefined;
-        }
+             document.getElementById("exit").style.display="none";
+             document.getElementById("reg").style.display="initial";
+        }else{
         var user = document.getElementById("username");
         user.textContent = name;
-        return user;
+        document.getElementById("add").textContent = "Add your posts";
+            document.getElementById("addButton").style.display="initial";
+             document.getElementById("exit").style.display="initial";
+              document.getElementById("reg").style.display="none";
+          }
     }
 
-    static addPhotoPostToHtml(photoPost) {
-        const posts = document.getElementById("posts");
-        const temp = document.getElementById("temp");
-         if (document.getElementById(photoPost.id) != null)
-             return;
-
-        var post = document.importNode(temp.content, true);
-
-        post.querySelector('div[class="photo"]').id = photoPost.id;
-        post.getElementById('user').textContent = this._user;
-        var str = "";
-        for (var i = 0; i < photoPost.hashTags.length; i++) {
-            str = str + photoPost.hashTags[i] + " ";
+    static addPhotoPostToHtml(post) {
+        let elements = document.getElementById('posts');
+        let element = document.createElement("div");
+        element.id = post.id;
+        element.className="photo";
+        element.classList.add("posts");
+        let str = "";
+        for (let i = 0; i < post.hashTags.length; i++) {
+            str = str + post.hashTags[i] + " ";
         }
-        post.getElementById('hashtags').textContent = str;
-        post.getElementById('description').textContent = photoPost.description+"  id:"+photoPost.id;
-        post.getElementById('photo').src = photoPost.photoLink;
-        var dd = photoPost.createdAt.getDate();
-        var mm = photoPost.createdAt.getMonth();     
-        var yy = photoPost.createdAt.getFullYear();
-        var hh = photoPost.createdAt.getHours();
-        var min = photoPost.createdAt.getMinutes();
-        if (min < 10) min = '0' + min;
-        var date = dd + "." + mm + "." + yy +" "+ hh + ":" + min;
-        post.getElementById('date').textContent = date;
-        if (photoPost.author !== this._user) {
-            post.getElementById('edit').style.display = "none";
-            post.getElementById('delete').style.display = "none";
+
+        let a = `
+        <div class="photo" id=${post.id}>
+                <div id='user' class="username">${post.author}</div>
+                <div id='date' class="date">${post.createdAt}</div>
+                <img id='photo' src="${post.photoLink}" width="70%" height="60%">
+                <img src="https://pixy.org/src/477/4773926.png"; height="40"; width="40"; hspace="30%"; vspace="2px">
+                <button class="delete" id='delete'><img src="https://cdn.icon-icons.com/icons2/1089/PNG/512/basket_78316.png"; height="40"; width="40";></button>
+                <button class="edit" id='edit' ><img src="https://sharpsnippets.files.wordpress.com/2013/12/editblue.png"; height="40"; width="40";></button>
+                <div id='hashtags' class="hashtag">${str}</div>
+            <div class="desc" id="description"><b><i><face="Georgia" size="2px">${post.description}</font></i></b> </div>
+        </div>`;
+
+        element.innerHTML = a;
+        if (post.author !== View._user) {
+            element.querySelector('#delete').style.display = "none";
+            element.querySelector('#edit').style.display = "none";
         }
-        posts.append(post);
+        var tempUser = JSON.parse(localStorage.getItem('tempUser'));
+        elements.appendChild(element);
+        element.addEventListener('click', function (event) {
+            var target = event.target;
+
+            if (target.className === 'delete') {
+                View.removePost(post.id);
+            }
+
+            if (target.className === 'edit') {
+                View.editOrAdd="";
+                document.getElementById('photoModal').src = post.photoLink;
+                document.getElementById('nameModal').textContent = post.author;
+                document.getElementById('dateModal').textContent = post.createdAt;
+                document.getElementById('shortDescrModal').value = post.description;
+                document.getElementById('hashTagsModal').value = str;
+                editModal.style.display = 'block';
+                View.idToEdit = post.id;
+                View.editOrAdd = 'edit';
+            }
+
+        });
     }
 
-    static addPost(photoPost)  {
-        const posts = document.getElementById("posts");
-        const temp = document.getElementById("temp");
-         if (document.getElementById(photoPost.id) != null)
-             return;
 
-        var post = document.importNode(temp.content, true);
+    static compareTo(a, b) {
+        if (a.createdAt > b.createdAt) {
+            return -1;
+        }
+        if (a.createdAt < b.createdAt) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
+    }
 
-        post.querySelector('div[class="photo"]').id = photoPost.id;
-        post.getElementById('user').textContent = this._user;
-        var str = "";
-        for (var i = 0; i < photoPost.hashTags.length; i++) {
-            str = str + photoPost.hashTags[i] + " ";
-        }
-        post.getElementById('hashtags').textContent = str;
-        post.getElementById('description').textContent = photoPost.description+"  id:"+photoPost.id;
-        post.getElementById('photo').src = photoPost.photoLink;
-        var dd = photoPost.createdAt.getDate();
-        var mm = photoPost.createdAt.getMonth();     
-        var yy = photoPost.createdAt.getFullYear();
-        var hh = photoPost.createdAt.getHours();
-        var min = photoPost.createdAt.getMinutes();
-        if (min < 10) min = '0' + min;
-        var date = dd + "." + mm + "." + yy +" "+ hh + ":" + min;
-        post.getElementById('date').textContent = date;
-        posts.append(post);
-        if(!this._authors.has(this._user)){
-             var elem = document.createElement('option');
-            elem.value = this._user;
-            (document.querySelector('datalist[id="authors"]')).appendChild(elem);
-        }
-        
+
+    static addPost(photoPost) {
+      View.addPhotoPostToHtml(photoPost);
     }
 
     static showPosts(posts) {
@@ -338,6 +358,7 @@ class View {
     }
 
 }
+ modul.setUser("Guest");
 
 
 

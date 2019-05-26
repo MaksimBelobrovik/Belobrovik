@@ -63,7 +63,14 @@
           padding-right: 15px;
           padding-bottom: 40px;
           }
-
+.image2 {
+          position: relative;
+          width: 20%;
+          height: 13%;
+          padding: 6px;
+          padding-right: 15px;
+          padding-bottom: 40px;
+          }
  .username {
           background: rgba(255, 255, 255, 0.5);
           width: 20%;
@@ -152,4 +159,41 @@
           width: 15%px;
           border:  0px solid black;
           white-space:pre-line;
+          }
+.exit {
+       position relative;
+       align="right"
+       }
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+   background: rgba(255, 255, 255, 0.88);
+             width: 60%;
+             height: 60%;
+             border: 1px solid black;
+             padding: 6px;
+             padding-right: 15px;
+             border-radius: 20px;
+             bottom: 12%;
+             right: 28%;
+}
+.filterField{
+    position: relative;
+    background: rgba(255, 255, 255, 0.88);
+                 width: 30%;
+                 height: 9%;
+                 border: 1px solid black;
+                 padding: 6px;
+                 padding-right: 15px;
+                 border-radius: 20px;
+
+}
+.buttonC{
+          position:relative;
+          background: linear-gradient(to top, #870d09, #4b9aee);
+          width: 8%;
+          height: 6%;
+          border-radius: 3px;
+          left: 90%
           }
